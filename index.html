@@ -5,7 +5,6 @@
 <title>Sertifikat Supervisi Akademik</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
 <style>
 @media print {
@@ -43,49 +42,29 @@ body{
     border:14px solid #0f4c5c;
     position:relative;
     box-shadow:0 15px 30px rgba(0,0,0,0.25);
-    overflow:hidden;
 }
 
-.certificate::before{
-    content:"";
-    position:absolute;
-    width:200%;
-    height:200%;
-    background:
-    repeating-radial-gradient(circle at center,
-    rgba(0,150,136,0.04) 0px,
-    rgba(0,150,136,0.04) 2px,
-    transparent 2px,
-    transparent 25px);
-    transform:rotate(20deg);
-    z-index:0;
-}
-
-.logo{ width:120px; margin-bottom:15px; position:relative; z-index:2; }
+.logo{ width:120px; margin-bottom:15px; }
 
 h1{
     font-size:44px;
     color:#00897b;
     letter-spacing:4px;
     margin:5px 0;
-    position:relative;
-    z-index:2;
 }
 
-.nomor{ font-size:18px; margin-bottom:35px; z-index:2; position:relative; }
+.nomor{ font-size:18px; margin-bottom:35px; }
 
 .name{
     font-size:32px;
     font-weight:bold;
     color:#1a237e;
     margin:20px 0;
-    position:relative;
-    z-index:2;
 }
 
-.school{ font-size:20px; margin-bottom:25px; position:relative; z-index:2; }
+.school{ font-size:20px; margin-bottom:25px; }
 
-.details{ font-size:18px; line-height:1.7; margin-top:20px; position:relative; z-index:2; }
+.details{ font-size:18px; line-height:1.7; margin-top:20px; }
 
 ul{
     list-style-type:square;
@@ -93,8 +72,6 @@ ul{
     margin:25px auto;
     text-align:left;
     font-size:18px;
-    position:relative;
-    z-index:2;
 }
 
 .signature{
@@ -102,7 +79,6 @@ ul{
     right:70px;
     bottom:150px;
     text-align:right;
-    z-index:2;
 }
 
 .qr{ margin:12px 0; }
@@ -112,7 +88,6 @@ ul{
     left:30px;
     bottom:15px;
     text-align:left;
-    z-index:2;
 }
 
 #kode-sertifikat{
@@ -124,7 +99,7 @@ ul{
 .microtext{
     font-size:8px;
     letter-spacing:1px;
-    opacity:0.3;
+    opacity:0.4;
 }
 
 button{
@@ -148,32 +123,6 @@ button:hover{ background:#00695c; }
 <option>SD N RUMPIN 01</option>
 <option>SD N RUMPIN 02</option>
 <option>SD NEGERI RUMPIN 03</option>
-<option>SDN CIPINANG 01</option>
-<option>SD N CIPINANG 02</option>
-<option>SD N CIPINANG 03</option>
-<option>SD N CIPINANG 04</option>
-<option>SD N CIPINANG 05</option>
-<option>SD N CIPINANG 06</option>
-<option>SD N SUKASARI 01</option>
-<option>SD N SUKASARI 02</option>
-<option>SDN SUKASARI 03</option>
-<option>SD N SUKASARI 04</option>
-<option>SD N SUKASARI 05</option>
-<option>SD N TAMANSARI 05</option>
-<option>SD N CIAUL</option>
-<option>SD N LEUWIRANJI 01</option>
-<option>SD N LEUWIRANJI 02</option>
-<option>SD N LEUWIRANJI 03</option>
-<option>SDN LEUWIRANJI 05</option>
-<option>SD N MALAHPAR</option>
-<option>SD N TAMANSARI 04</option>
-<option>SD N KERTAJAYA 02</option>
-<option>SD N KERTAJAYA 03</option>
-<option>SD N KERTAJAYA 04</option>
-<option>SD N KERTAJAYA 05</option>
-<option>SD N KERTAJAYA 06</option>
-<option>SDN TAMANSARI 02</option>
-<option>SD NEGERI TAMANSARI 03</option>
 </select>
 <button onclick="generateCertificate()">Buat Sertifikat</button>
 </div>
@@ -217,54 +166,63 @@ Kode Sertifikat: <span id="kodeValue">-</span>
 </div>
 
 <script>
+
+// ===== GENERATE CERTIFICATE =====
 function generateCertificate(){
 
-var nama = document.getElementById("namaInput").value;
-var sekolah = document.getElementById("sekolahInput").value;
+  var nama = document.getElementById("namaInput").value;
+  var sekolah = document.getElementById("sekolahInput").value;
 
-if(nama=="" || sekolah==""){
-alert("Nama dan Sekolah wajib diisi");
-return;
+  if(nama=="" || sekolah==""){
+    alert("Nama dan Sekolah wajib diisi");
+    return;
+  }
+
+  document.getElementById("namaPeserta").innerText = nama;
+  document.getElementById("namaSekolah").innerText = sekolah;
+
+  document.getElementById("qrcode").innerHTML="";
+
+  var isiQR = "Ditanda tangani secara elektronik oleh Pengawas Pembina SD Kecamatan Rumpin";
+
+  new QRCode(document.getElementById("qrcode"), {
+    text: isiQR,
+    width:110,
+    height:110
+  });
+
+  kirimKeServer(nama, sekolah);
 }
 
-document.getElementById("namaPeserta").innerText = nama;
-document.getElementById("namaSekolah").innerText = sekolah;
 
-var rawData = nama + sekolah + "19780810201001100813022026";
-var hash = CryptoJS.SHA256(rawData).toString();
-document.getElementById("hashArea").innerText = "Security Hash: " + hash;
+// ===== JSONP REQUEST =====
+function kirimKeServer(nama, sekolah){
 
-document.getElementById("qrcode").innerHTML="";
-var isiQR = "Ditanda tangani secara elektronik oleh Pengawas Pembina SD Kecamatan Rumpin. Hedi Herdiawan, S.Pd., M.M. NIP.197808102010011008";
+  const script = document.createElement("script");
 
-new QRCode(document.getElementById("qrcode"), {
-text: isiQR,
-width:110,
-height:110
-});
+  script.src =
+  "https://script.google.com/macros/s/AKfycbwDyfzM0bp1Ux7d-txHrRYqwyHDDAMgwj1UGjK1DswoUvm-4dZUPTfHh3yK7jJYcFIi/exec"
+  + "?nama=" + encodeURIComponent(nama)
+  + "&sekolah=" + encodeURIComponent(sekolah)
+  + "&kodeKegiatan=SA"
+  + "&callback=handleResponse";
 
-/* ===== Generate Kode Sertifikat ===== */
-
-fetch("https://script.google.com/macros/s/AKfycbwDyfzM0bp1Ux7d-txHrRYqwyHDDAMgwj1UGjK1DswoUvm-4dZUPTfHh3yK7jJYcFIi/exec"
-+ "?nama=" + encodeURIComponent(nama)
-+ "&sekolah=" + encodeURIComponent(sekolah)
-+ "&kodeKegiatan=SA"
-)
-.then(res => res.json())
-.then(response => {
-
-    if(response.success){
-        document.getElementById("kodeValue").innerText = response.nomor;
-        document.getElementById("hashArea").innerText = "Security Hash: " + response.hash;
-    } else {
-        alert("Gagal menyimpan data");
-    }
-
-})
-.catch(error => {
-    console.error("Error:", error);
-});
+  document.body.appendChild(script);
 }
+
+
+// ===== HANDLE RESPONSE =====
+function handleResponse(response){
+
+  if(response.success){
+      document.getElementById("kodeValue").innerText = response.nomor;
+      document.getElementById("hashArea").innerText = "Security Hash: " + response.hash;
+  } else {
+      alert("Gagal menyimpan data");
+  }
+
+}
+
 </script>
 
 </body>
