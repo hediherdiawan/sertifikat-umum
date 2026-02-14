@@ -244,8 +244,7 @@ height:110
 });
 
 /* ===== Generate Kode Sertifikat ===== */
-const kode = generateKodeSertifikat(nama, sekolah);
-document.getElementById("kodeValue").innerText = kode;
+
 fetch("https://script.google.com/macros/s/AKfycbwDyfzM0bp1Ux7d-txHrRYqwyHDDAMgwj1UGjK1DswoUvm-4dZUPTfHh3yK7jJYcFIi/exec", {
   method: "POST",
   headers: {
@@ -257,34 +256,20 @@ fetch("https://script.google.com/macros/s/AKfycbwDyfzM0bp1Ux7d-txHrRYqwyHDDAMgwj
     kodeKegiatan: "SA"
   })
 })
-.then(response => response.json())
-.then(data => {
-    console.log(data);
+.then(res => res.json())
+.then(response => {
+    console.log("Response:", response);
+
+    if(response.success){
+        document.getElementById("kodeValue").innerText = response.nomor;
+        document.getElementById("hashArea").innerText = "Security Hash: " + response.hash;
+    } else {
+        alert("Gagal menyimpan data");
+    }
 })
 .catch(error => {
-    console.error(error);
-});}
-
-function generateKodeSertifikat(nama, sekolah) {
-
-    const prefix = "RMP/SA/2026/";
-    const nomorUrut = "001";
-
-    const rawData = nama + sekolah + "HediHerdiawan197808102010011008";
-
-    let hash = 0;
-    for (let i = 0; i < rawData.length; i++) {
-        hash = ((hash << 5) - hash) + rawData.charCodeAt(i);
-        hash |= 0;
-    }
-
-    const unique = Math.abs(hash)
-        .toString(36)
-        .toUpperCase()
-        .substring(0,6);
-
-    return prefix + nomorUrut + "/" + unique;
-}
+    console.error("Error:", error);
+});
 </script>
 
 </body>
