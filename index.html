@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Sertifikat Supervisi Akademik</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+<style>
+@media print {
+  body * { visibility: hidden; }
+  #certificate, #certificate * { visibility: visible; }
+  #certificate {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+    height: 297mm;
+    margin: 0;
+    box-shadow: none;
+    border: none;
+  }
+  body { margin: 0; background: white; }
+  @page { size: A4 portrait; margin: 0; }
+}
+
+body{
+    background:#e9ecef;
+    font-family:'Georgia', serif;
+    text-align:center;
+}
+
+.input-area{ margin:20px; }
+
+.certificate{
+    width:794px;
+    height:1122px;
+    background:white;
+    margin:20px auto;
+    padding:80px 70px;
+    box-sizing:border-box;
+    border:14px solid #0f4c5c;
+    position:relative;
+    box-shadow:0 15px 30px rgba(0,0,0,0.25);
+    overflow:hidden;
+}
+
+.certificate::before{
+    content:"";
+    position:absolute;
+    width:200%;
+    height:200%;
+    background:
+    repeating-radial-gradient(circle at center,
+    rgba(0,150,136,0.04) 0px,
+    rgba(0,150,136,0.04) 2px,
+    transparent 2px,
+    transparent 25px);
+    transform:rotate(20deg);
+    z-index:0;
+}
+
+.logo{ width:120px; margin-bottom:15px; position:relative; z-index:2; }
+
+h1{
+    font-size:44px;
+    color:#00897b;
+    letter-spacing:4px;
+    margin:5px 0;
+    position:relative;
+    z-index:2;
+}
+
+.nomor{ font-size:18px; margin-bottom:35px; z-index:2; position:relative; }
+
+.name{
+    font-size:32px;
+    font-weight:bold;
+    color:#1a237e;
+    margin:20px 0;
+    position:relative;
+    z-index:2;
+}
+
+.school{ font-size:20px; margin-bottom:25px; position:relative; z-index:2; }
+
+.details{ font-size:18px; line-height:1.7; margin-top:20px; position:relative; z-index:2; }
+
+ul{
+    list-style-type:square;
+    width:70%;
+    margin:25px auto;
+    text-align:left;
+    font-size:18px;
+    position:relative;
+    z-index:2;
+}
+
+.signature{
+    position:absolute;
+    right:70px;
+    bottom:150px;
+    text-align:right;
+    z-index:2;
+}
+
+.qr{ margin:12px 0; }
+
+.bottom-left{
+    position:absolute;
+    left:30px;
+    bottom:15px;
+    text-align:left;
+    z-index:2;
+}
+
+#kode-sertifikat{
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:4px;
+}
+
+.microtext{
+    font-size:8px;
+    letter-spacing:1px;
+    opacity:0.3;
+}
+
+button{
+    padding:10px 20px;
+    background:#00897b;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{ background:#00695c; }
+</style>
+</head>
+<body>
+
+<div class="input-area">
+<input type="text" id="namaInput" placeholder="Masukkan Nama Peserta">
+<select id="sekolahInput">
+<option value="">-- Pilih Sekolah --</option>
+<option>SD N JANALA</option>
+<option>SD N RUMPIN 01</option>
+<option>SD N RUMPIN 02</option>
+<option>SD NEGERI RUMPIN 03</option>
+<option>SDN CIPINANG 01</option>
+<option>SD N CIPINANG 02</option>
+<option>SD N CIPINANG 03</option>
+<option>SD N CIPINANG 04</option>
+<option>SD N CIPINANG 05</option>
+<option>SD N CIPINANG 06</option>
+<option>SD N SUKASARI 01</option>
+<option>SD N SUKASARI 02</option>
+<option>SDN SUKASARI 03</option>
+<option>SD N SUKASARI 04</option>
+<option>SD N SUKASARI 05</option>
+<option>SD N TAMANSARI 05</option>
+<option>SD N CIAUL</option>
+<option>SD N LEUWIRANJI 01</option>
+<option>SD N LEUWIRANJI 02</option>
+<option>SD N LEUWIRANJI 03</option>
+<option>SDN LEUWIRANJI 05</option>
+<option>SD N MALAHPAR</option>
+<option>SD N TAMANSARI 04</option>
+<option>SD N KERTAJAYA 02</option>
+<option>SD N KERTAJAYA 03</option>
+<option>SD N KERTAJAYA 04</option>
+<option>SD N KERTAJAYA 05</option>
+<option>SD N KERTAJAYA 06</option>
+<option>SDN TAMANSARI 02</option>
+<option>SD NEGERI TAMANSARI 03</option>
+</select>
+<button onclick="generateCertificate()">Buat Sertifikat</button>
+</div>
+
+<div id="certificate" class="certificate">
+
+<img src="https://disdik.bogorkab.go.id/uploads/settings/17550565574906.png" class="logo">
+
+<h1>SERTIFIKAT</h1>
+<div class="nomor">No. 001/Kombel/II/2026</div>
+
+<div>Diberikan kepada:</div>
+<div class="name" id="namaPeserta">................................</div>
+<div class="school" id="namaSekolah"></div>
+
+<div class="details">
+Sebagai peserta kegiatan Supervisi Akademik Gugus 1-4 dan berbagi praktik baik,
+tahun ajaran 2025/2026, dengan durasi 8 JP.
+</div>
+
+<ul>
+<li>Micro Teaching (4 JP)</li>
+<li>Administrasi Pembelajaran (4 JP)</li>
+</ul>
+
+<div class="signature">
+Rumpin, 13 Februari 2026<br><br>
+Pengawas Pembina SD Kecamatan Rumpin
+<div class="qr" id="qrcode"></div>
+<b>Hedi Herdiawan, S.Pd., M.M.</b><br>
+NIP.197808102010011008
+</div>
+
+<div class="bottom-left">
+<div id="kode-sertifikat">
+Kode Sertifikat: <span id="kodeValue">-</span>
+</div>
+<div class="microtext" id="hashArea"></div>
+</div>
+
+</div>
+
+<script>
+function generateCertificate(){
+
+var nama = document.getElementById("namaInput").value;
+var sekolah = document.getElementById("sekolahInput").value;
+
+if(nama=="" || sekolah==""){
+alert("Nama dan Sekolah wajib diisi");
+return;
+}
+
+document.getElementById("namaPeserta").innerText = nama;
+document.getElementById("namaSekolah").innerText = sekolah;
+
+var rawData = nama + sekolah + "19780810201001100813022026";
+var hash = CryptoJS.SHA256(rawData).toString();
+document.getElementById("hashArea").innerText = "Security Hash: " + hash;
+
+document.getElementById("qrcode").innerHTML="";
+var isiQR = "Ditanda tangani secara elektronik oleh Pengawas Pembina SD Kecamatan Rumpin. Hedi Herdiawan, S.Pd., M.M. NIP.197808102010011008";
+
+new QRCode(document.getElementById("qrcode"), {
+text: isiQR,
+width:110,
+height:110
+});
+
+/* ===== Generate Kode Sertifikat ===== */
+const kode = generateKodeSertifikat(nama, sekolah);
+document.getElementById("kodeValue").innerText = kode;
+fetch("https://script.google.com/macros/s/AKfycbwDyfzM0bp1Ux7d-txHrRYqwyHDDAMgwj1UGjK1DswoUvm-4dZUPTfHh3yK7jJYcFIi/exec", {
+  method: "POST",
+  mode: "no-cors",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    nama: nama,
+    sekolah: sekolah,
+    kode: kode,
+    hash: hash
+  })
+});
+}
+
+function generateKodeSertifikat(nama, sekolah) {
+
+    const prefix = "RMP/SA/2026/";
+    const nomorUrut = "001";
+
+    const rawData = nama + sekolah + "HediHerdiawan197808102010011008";
+
+    let hash = 0;
+    for (let i = 0; i < rawData.length; i++) {
+        hash = ((hash << 5) - hash) + rawData.charCodeAt(i);
+        hash |= 0;
+    }
+
+    const unique = Math.abs(hash)
+        .toString(36)
+        .toUpperCase()
+        .substring(0,6);
+
+    return prefix + nomorUrut + "/" + unique;
+}
+</script>
+
+</body>
+</html>
