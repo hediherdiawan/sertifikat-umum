@@ -245,20 +245,13 @@ height:110
 
 /* ===== Generate Kode Sertifikat ===== */
 
-fetch("https://script.google.com/macros/s/AKfycbwDyfzM0bp1Ux7d-txHrRYqwyHDDAMgwj1UGjK1DswoUvm-4dZUPTfHh3yK7jJYcFIi/exec", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    nama: nama,
-    sekolah: sekolah,
-    kodeKegiatan: "SA"
-  })
-})
+fetch("https://script.google.com/macros/s/AKfycbwDyfzM0bp1Ux7d-txHrRYqwyHDDAMgwj1UGjK1DswoUvm-4dZUPTfHh3yK7jJYcFIi/exec"
++ "?nama=" + encodeURIComponent(nama)
++ "&sekolah=" + encodeURIComponent(sekolah)
++ "&kodeKegiatan=SA"
+)
 .then(res => res.json())
 .then(response => {
-    console.log("Response:", response);
 
     if(response.success){
         document.getElementById("kodeValue").innerText = response.nomor;
@@ -266,6 +259,7 @@ fetch("https://script.google.com/macros/s/AKfycbwDyfzM0bp1Ux7d-txHrRYqwyHDDAMgwj
     } else {
         alert("Gagal menyimpan data");
     }
+
 })
 .catch(error => {
     console.error("Error:", error);
